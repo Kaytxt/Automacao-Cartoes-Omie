@@ -1,108 +1,164 @@
-## **Guia de Utilização: Automatizador de Extratos de Cartão de Crédito**
+##### **Guia de Utilização: Automatizador de Extratos de Cartão de Crédito**
 
 
 
-Este guia descreve como usar o aplicativo executável para automatizar a inserção de dados de extratos de cartão de crédito em sua planilha de contas a pagar.
+Este guia descreve como usar o seu aplicativo para automatizar a inserção de dados de extratos de cartão de crédito em sua planilha de contas a pagar, com a nova funcionalidade de conciliação com a API Omie.
 
 
 
 ###### **1. Requisitos e Preparação**
 
-Antes de usar o programa, garanta que a planilha base esteja no local correto. O executável foi configurado para buscar a planilha no seguinte caminho:
+Antes de usar o programa, garanta que a planilha base e os arquivos de credenciais estejam no local correto.
 
 
 
-###### **Caminho da Planilha Base:**
+**Caminho da Planilha Base:**
+
+O programa está configurado para buscar a planilha no seguinte caminho:
 
 C:\\Bitrix24\\Aurora Hotel\\Automação\\Omie\_Contas\_Pagar\_v1\_1\_5.xlsx
 
+Verifique se o arquivo existe exatamente nesta pasta. Se não for encontrado, o programa exibirá um erro.
 
 
-* **Verifique o Caminho:** Certifique-se de que o arquivo Omie\_Contas\_Pagar\_v1\_1\_5.xlsx exista exatamente nessa pasta. Se ele não for encontrado, o programa exibirá um erro.
 
+**Arquivo de Credenciais (.json):**
 
+O programa busca as chaves de acesso da Omie na pasta credenciais. Certifique-se de que o arquivo JSON do cliente selecionado (aurora\_hotel.json, elias\_carnes.json, etc.) esteja presente e com o formato correto.
 
-* **Novo Arquivo Gerado:** Após o processamento, o programa criará uma cópia da planilha com os dados do extrato na sua Área de Trabalho. A planilha original na pasta Automação não será alterada.
 
 
+**Novo Arquivo Gerado:**
 
-###### **2. Interface do Programa**
+Após o processamento, uma nova planilha será criada na sua Área de Trabalho com os dados do extrato já conciliados. A planilha original não será alterada.
 
-Ao abrir o executável, você verá uma janela simples com os seguintes campos:
 
 
+###### **2. Interface do Programa (Tela Principal)**
 
-**Selecione o banco:** Um menu suspenso para escolher o banco do extrato. As opções disponíveis são Sicoob, Banco do Brasil, Caixa e Itaú.
+Ao abrir o aplicativo, você verá uma tela inicial organizada com os seguintes campos:
 
 
 
-**Arquivo de Extrato:** Um campo de texto onde você deve inserir o caminho do arquivo do extrato do cartão de crédito. Você pode clicar no botão "Procurar..." para navegar e selecionar o arquivo no seu computador. Os formatos de arquivo aceitos são .ofx (para Sicoob) e .pdf (para os demais bancos).
+Selecione o cliente: Um menu para escolher o cliente que será processado. A seleção do cliente é essencial para carregar as credenciais de API corretas.
 
 
 
-**Conta Corrente:** Digite o nome da sua conta corrente associada a este cartão. O valor será inserido na coluna E da planilha.
+Selecione o banco: Escolha o banco do extrato. Os formatos aceitos são .ofx (para Sicoob) e .pdf (para os demais bancos).
 
 
 
-**Data de Vencimento:** Insira a data de vencimento da fatura no formato DD/MM/AAAA. O valor será inserido na coluna K da planilha.
+Arquivo de Extrato: Clique em "Procurar..." para selecionar o arquivo do extrato em seu computador.
 
 
 
-###### **3. Processando os Dados**
+Conta Corrente: Digite o nome da conta corrente para que o valor seja inserido na coluna E da planilha.
 
-Preencha os campos: Siga as instruções da seção anterior para selecionar o banco, o arquivo de extrato, a conta corrente e a data de vencimento.
 
 
+Data de Vencimento: Insira a data de vencimento da fatura no formato DD/MM/AAAA.
 
-Clique em "Processar": Após preencher todos os campos, clique no botão "Processar".
 
 
+Status do Processamento: A área de texto na parte inferior mostrará o status e as mensagens do programa.
 
-Aguarde o Processamento: O programa começará a ler o extrato, extrair as transações e inserir os dados na nova planilha.
 
 
+###### **3. Processo de Conciliação e Salvamento**
 
-**Verifique o Resultado:**
+O fluxo do programa agora tem uma etapa intermediária para garantir a precisão dos dados.
 
 
 
-Se o processamento for bem-sucedido, uma mensagem de sucesso será exibida, informando quantas transações foram inseridas e o nome do novo arquivo gerado.
+Preencha os Campos: Na tela principal, preencha todos os campos e clique em "Processar".
 
 
 
-Em caso de erro (por exemplo, se o arquivo base não for encontrado ou o formato do extrato for incompatível), uma mensagem de erro será exibida.
+Início da Conciliação: O programa irá:
 
 
 
-###### **4. Funcionamento Interno e Mapeamento de Colunas**
+Extrair os dados do extrato.
 
-O programa foi desenvolvido para preencher a planilha com os dados do extrato de forma automatizada. Os dados extraídos são mapeados para as seguintes colunas na planilha:
 
 
+Conectar-se à API da Omie para buscar a lista de fornecedores e categorias.
 
-Coluna C: Fornecedor (descrição da compra)
 
 
+Tentar fazer uma conciliação automática, comparando as descrições do extrato com os nomes dos fornecedores da Omie.
 
-Coluna D: Categoria (sempre "Cartão de Credito")
 
 
+Tela de Conciliação Manual: Se o programa não conseguir conciliar 100% dos itens automaticamente, uma nova janela de "Conciliação Manual" será aberta.
 
-Coluna E: Conta Corrente (valor informado por você)
 
 
+Tabela do Extrato: À esquerda, você verá uma tabela com os itens que precisam de sua atenção. As colunas "Fornecedor Omie" e "Categoria Omie" estarão em branco para esses itens.
 
-Coluna F: Valor da Conta (valor da transação)
 
 
+Abas de Conciliação: À direita, você encontrará duas abas:
 
-Coluna J: Data de Registro (data da compra)
 
 
+Fornecedores: Uma lista completa de todos os clientes da Omie para o cliente selecionado. Use o campo de "Pesquisar" ou role a lista para encontrar e selecionar o fornecedor correto.
 
-Coluna K: Data de Vencimento (valor informado por você)
 
 
+Categorias: Uma lista de todas as categorias cadastradas na Omie. A categoria padrão "Cartão de Credito" estará disponível para seleção.
 
-A inserção de dados começa a partir da linha 6, e novas linhas são adicionadas para cada transação encontrada no extrato. A formatação original da planilha base é preservada.
+
+
+Como Usar:
+
+
+
+Dê um clique duplo na linha da tabela do extrato que você quer editar.
+
+
+
+O programa irá selecionar automaticamente a aba correspondente para você.
+
+
+
+Dê um clique duplo no nome do fornecedor ou categoria na lista à direita para preencher a coluna correta na tabela do extrato.
+
+
+
+Ao terminar, clique em "Salvar e Fechar".
+
+
+
+Geração da Planilha: O programa irá gerar a nova planilha na sua Área de Trabalho com todos os dados preenchidos, incluindo as suas correções manuais.
+
+
+
+###### **4. Mapeamento de Colunas**
+
+O programa preenche a planilha com os dados do extrato da seguinte forma:
+
+
+
+Coluna C: Fornecedor (Nome conciliado da Omie ou a descrição original)
+
+
+
+Coluna D: Categoria (Valor selecionado na tela de conciliação manual)
+
+
+
+Coluna E: Conta Corrente (Valor informado por você)
+
+
+
+Coluna F: Valor da Conta (Valor da transação)
+
+
+
+Coluna J: Data de Registro (Data da compra)
+
+
+
+Coluna K: Data de Vencimento (Valor informado por você)
 
