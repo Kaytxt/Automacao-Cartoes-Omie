@@ -660,7 +660,7 @@ class ReconciliationWindow(tk.Toplevel):
     def __init__(self, parent, transactions: List[Dict], omie_suppliers: List[Dict], omie_categories: List[Dict]):
         super().__init__(parent)
         self.title("Conciliação Manual de Fornecedores e Categorias")
-        self.geometry("1200x700")
+        self.geometry("1250x600")
         self.transient(parent)
         self.grab_set()
         
@@ -682,29 +682,24 @@ class ReconciliationWindow(tk.Toplevel):
         main_frame = ttk.Frame(self, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # --- Buttons at the bottom ---
-        button_frame = ttk.Frame(main_frame)
-        button_frame.pack(side=tk.BOTTOM, pady=10)
-        
-        save_button = ttk.Button(button_frame, text="Salvar e Fechar", command=self.save_and_close)
-        save_button.pack(side=tk.LEFT, padx=10)
-
-        # --- Top part that expands ---
         extrato_frame = ttk.Frame(main_frame, padding="10")
         extrato_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         extrato_title = ttk.Label(extrato_frame, text="Itens do Extrato a Conciliar:", font=("Helvetica", 10, "bold"))
         extrato_title.pack(pady=(0, 10))
 
-        columns = ('data_registro', 'fornecedor', 'fornecedor_omie', 'categoria_omie')
-        self.tree = ttk.Treeview(extrato_frame, columns=columns, show='headings')
+        columns = ('data_registro', 'fornecedor', 'valor', 'fornecedor_omie', 'categoria_omie')
+        self.tree = ttk.Treeview(extrato_frame, columns=columns, show='headings') # Corrigido: Removida a palavra 'grid'
+        
         self.tree.heading('data_registro', text='Data')
-        self.tree.heading('fornecedor', text='Descrição Extrato')
+        self.tree.heading('fornecedor', text='Descrição')
+        self.tree.heading('valor', text='Valor')
         self.tree.heading('fornecedor_omie', text='Fornecedor Omie')
         self.tree.heading('categoria_omie', text='Categoria Omie')
         
         self.tree.column('data_registro', width=80, anchor=tk.CENTER)
         self.tree.column('fornecedor', width=250)
+        self.tree.column('valor', width=90, anchor=tk.E)
         self.tree.column('fornecedor_omie', width=250)
         self.tree.column('categoria_omie', width=150)
 
@@ -764,14 +759,22 @@ class ReconciliationWindow(tk.Toplevel):
 
         self.search_entry_cat.bind('<KeyRelease>', self.filter_categories)
         self.category_listbox.bind('<Double-1>', self.on_category_listbox_double_click)
+        
+        button_frame = ttk.Frame(self)
+        button_frame.pack(pady=10)
+        
+        save_button = ttk.Button(button_frame, text="Salvar e Fechar", command=self.save_and_close)
+        save_button.pack(side=tk.LEFT, padx=10)
 
     def populate_treeview(self):
         self.tree.delete(*self.tree.get_children())
         self.tree_items = {}
         for transaction in self.unreconciled_transactions:
+            # NOVO: Ordem dos valores ajustada para combinar com a nova ordem das colunas
             item_id = self.tree.insert('', tk.END, values=(
                 transaction['data_registro'],
                 transaction['fornecedor'],
+                f"{transaction['valor']:.2f}",
                 '',
                 'Cartão de Credito'
             ))
@@ -784,9 +787,10 @@ class ReconciliationWindow(tk.Toplevel):
         if not selected_item:
             return
         
-        if column_id == '#3':
+        # NOVO: Índices de colunas ajustados
+        if column_id == '#4': # Coluna de Fornecedor Omie
             self.notebook.select(self.supplier_tab)
-        elif column_id == '#4':
+        elif column_id == '#5': # Coluna de Categoria Omie
             self.notebook.select(self.category_tab)
         
         self.tree.selection_set(selected_item)
@@ -818,7 +822,8 @@ class ReconciliationWindow(tk.Toplevel):
             return
 
         values = list(self.tree.item(selected_tree_item, 'values'))
-        values[2] = selected_supplier
+        # NOVO: Índice da coluna de Fornecedor Omie agora é 3 (4ª coluna)
+        values[3] = selected_supplier
         self.tree.item(selected_tree_item, values=values)
         
         self.tree_items[selected_tree_item]['fornecedor_omie'] = selected_supplier
@@ -836,7 +841,8 @@ class ReconciliationWindow(tk.Toplevel):
             return
 
         values = list(self.tree.item(selected_tree_item, 'values'))
-        values[3] = selected_category
+        # NOVO: Índice da coluna de Categoria Omie agora é 4 (5ª coluna)
+        values[4] = selected_category
         self.tree.item(selected_tree_item, values=values)
 
         self.tree_items[selected_tree_item]['categoria'] = selected_category
@@ -851,7 +857,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Automatizador de Extratos e Conciliação Omie")
-        self.geometry("600x450")  # Define um tamanho inicial para a janela
+        self.state("zoomed")  # Define um tamanho inicial para a janela
         self.processor = ExtractProcessor()
         self.clients = ["Aurora Hotel", "Elias Carnes", "Ipê Amarelo", "Boteco Napoleão"]
         
@@ -890,6 +896,9 @@ class App(tk.Tk):
 
         self.status_label = ttk.Label(main_frame, text="", font=("Helvetica", 10), foreground="blue", wraplength=500)
         self.status_label.pack(pady=(10, 0))
+
+        # Adiciona a barra de progresso
+        self.progress_bar = ttk.Progressbar(main_frame, orient='horizontal', mode='indeterminate')
 
         # Binds
         self.client_combo.bind("<<ComboboxSelected>>", self.on_client_selected)
