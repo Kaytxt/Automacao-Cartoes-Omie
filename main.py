@@ -660,7 +660,7 @@ class ReconciliationWindow(tk.Toplevel):
     def __init__(self, parent, transactions: List[Dict], omie_suppliers: List[Dict], omie_categories: List[Dict]):
         super().__init__(parent)
         self.title("Conciliação Manual de Fornecedores e Categorias")
-        self.state('zoomed')
+        self.geometry("1200x700")
         self.transient(parent)
         self.grab_set()
         
@@ -682,6 +682,14 @@ class ReconciliationWindow(tk.Toplevel):
         main_frame = ttk.Frame(self, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
+        # --- Buttons at the bottom ---
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(side=tk.BOTTOM, pady=10)
+        
+        save_button = ttk.Button(button_frame, text="Salvar e Fechar", command=self.save_and_close)
+        save_button.pack(side=tk.LEFT, padx=10)
+
+        # --- Top part that expands ---
         extrato_frame = ttk.Frame(main_frame, padding="10")
         extrato_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
@@ -756,12 +764,6 @@ class ReconciliationWindow(tk.Toplevel):
 
         self.search_entry_cat.bind('<KeyRelease>', self.filter_categories)
         self.category_listbox.bind('<Double-1>', self.on_category_listbox_double_click)
-        
-        button_frame = ttk.Frame(self)
-        button_frame.pack(pady=10)
-        
-        save_button = ttk.Button(button_frame, text="Salvar e Fechar", command=self.save_and_close)
-        save_button.pack(side=tk.LEFT, padx=10)
 
     def populate_treeview(self):
         self.tree.delete(*self.tree.get_children())
